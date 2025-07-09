@@ -31,7 +31,7 @@ os.makedirs("variants", exist_ok=True)
 
 # === Streamlit Config ===
 st.set_page_config(page_title="🧬 Cancer Variant Pipeline", layout="wide")
-st.title("🧬 Cancer Exon Variant Detection Pipeline")
+st.title("🧬 Cancer Variant Detection from Metagenomic datasets")
 
 # === Clean folders function ===
 def clean_folders(folders):
