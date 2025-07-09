@@ -1,0 +1,42 @@
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS-specific metadata
+.DS_Store
+Thumbs.db
+
+# Log files and other outputs
+*.log
+
+# Output CSVs and generated data
+*.csv
+
+# FASTA index files
+*.fai
+*.amb
+*.ann
+*.bwt
+*.pac
+*.sa
+
+# BLAST DB files
+*.nhr
+*.nin
+*.nsq
+*.not
+*.ntf
+*.nto
+*.ndb
+
+# Windows metadata
+*:Zone.Identifier
+
+# Temporary folders created during app execution
+uploads/
+converted_fastas/
+blast_outputs/
+alignments/
+variants/
+
