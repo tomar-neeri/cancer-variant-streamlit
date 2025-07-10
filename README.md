@@ -1,46 +1,54 @@
-# 🧬 Cancer Variant Detection from Metagenomic Datasets
+🧬 Cancer Variant Detection from Metagenomic Datasets
+This Streamlit-based web application detects cancer-associated exon variants from uploaded metagenomic sequencing data. The pipeline uses BLAST, BWA, SAMtools, and BCFtools to compute relative abundance and perform variant calling, generating both tabular and heatmap visualizations.
 
-This Streamlit web application detects cancer-associated exon variants from uploaded metagenomic sequencing data using BLAST, BWA, Samtools, and BCFtools. It performs alignment, variant calling, and visualization for relative gene abundance and mutation counts.
+📁 Features
+Upload .fasta, .fastq, .fq, .gz, or .zip files.
 
----
+Detect cancer exon hits using BLASTn.
 
-## 📁 Features
+Perform alignments with BWA and call variants with SAMtools + BCFtools.
 
-- Upload `.fasta`, `.fastq`, `.fq`, `.gz`, or `.zip` files.
-- Detect hits using **BLASTn** against a cancer exon reference.
-- Perform alignments with **BWA** and variant calling using **Samtools + BCFtools**.
-- Generate:
-  - Relative abundance heatmaps.
-  - Mutation count heatmaps per cancer gene.
-  - Downloadable CSV summaries.
+Automatically decompress and convert formats via Biopython.
 
----
+Generates:
 
-## 🖥️ Run Locally (WSL/Linux)
+🧪 Relative abundance heatmap per gene.
 
-### 🔧 Prerequisites
+🔬 Mutation count heatmap per gene.
 
-- Python 3.8+
-- [BLAST+](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
-- BWA
-- Samtools
-- BCFtools
-- gzip, zip
-- Git
+📄 Downloadable CSV summaries.
 
-### 📦 System Package Installation (Ubuntu/WSL)
+🖼 PNG downloads of heatmaps.
 
-```bash
+📦 One-click download of all outputs in a .zip archive.
+
+🖥️ Run Locally (Linux/WSL Recommended)
+🔧 Prerequisites
+Python 3.8+
+
+makeblastdb, blastn (from BLAST+)
+
+bwa
+
+samtools
+
+bcftools
+
+gzip, zip, unzip
+
+git
+
+📦 System Package Installation (Ubuntu/WSL)
+bash
+Copy
+Edit
 sudo apt update && sudo apt install -y \
-    bwa samtools bcftools ncbi-blast+ \
-    gzip unzip build-essential python3-venv
-```
-
----
-
-### 🚀 Steps to Run
-
-```bash
+  bwa samtools bcftools ncbi-blast+ \
+  gzip unzip build-essential python3-venv
+🚀 Steps to Run
+bash
+Copy
+Edit
 # Clone the repository
 git clone https://github.com/tomar-neeri/cancer-variant-streamlit.git
 cd cancer-variant-streamlit
@@ -55,116 +63,100 @@ pip install -r requirements.txt
 
 # Run the Streamlit app
 streamlit run app.py
-```
+📍 Visit: http://localhost:8501
 
-Visit: [http://localhost:8501](http://localhost:8501)
-
----
-
-## 🧪 Input File Formats
-
+🧪 Input File Formats
 You can upload multiple files in any of the following formats:
 
-- `.fasta`, `.fa`, `.fna`
-- `.fastq`, `.fq`
-- `.gz` (compressed)
-- `.zip` (with valid sequences inside)
+.fasta, .fa, .fna
 
-Each sample will be processed to compute:
+.fastq, .fq
 
-- BLAST hits to known cancer exons
-- BWA alignment and variant calling
-- Relative gene hit counts and mutations
+.gz (compressed FASTQ/FASTA)
 
----
+.zip (must contain valid sequence files)
 
-## 📊 Outputs
+For each sample:
+Performs BLASTn search against cancer exons.
 
-- **Relative Abundance Heatmap**  
-  Cancer gene-wise relative % abundance from BLAST hits.
+Aligns reads with BWA and calls variants.
 
-- **Mutation Count Heatmap**  
-  Number of mutations per cancer gene from alignment-based variant calling.
+Extracts gene-wise abundance and mutation details.
 
-- **Downloadable Files**
-  - `abundance_summary.csv` — Gene-wise relative abundance
-  - `mutation_summary.csv` — Gene-wise mutation counts
+📊 Outputs
+📈 Relative Abundance Heatmap
+Gene-wise percent abundance from BLAST hits.
 
----
+🧬 Mutation Count Heatmap
+Number of unique mutations detected per cancer gene.
 
-## 🧠 Internal Workflow
+📁 Downloadable Outputs
+File	Description
+abundance_summary.csv	Relative abundance per cancer gene
+mutation_summary.csv	Mutation counts per cancer gene
+abundance_heatmap.png	Heatmap image of relative abundance
+mutation_heatmap.png	Heatmap image of mutation counts
+outputs_bundle.zip	Contains all of the above + intermediate files
 
-1. **Upload and format conversion**  
-   All uploaded files are decompressed and converted to `.fasta` if needed using Biopython.
+🔬 Internal Workflow
+Upload & Decompression
+Files are decompressed and converted into .fasta if necessary using Biopython.
 
-2. **BLASTn Search**  
-   Against the included `cancer_exons.fasta` database, reporting gene hits.
+BLASTn Search
+Queries each sample against cancer_exons.fasta using blastn.
 
-3. **BWA Alignment + Variant Calling**  
-   Variant detection from aligned reads using Samtools & BCFtools.
+BWA Alignment & Variant Calling
+Aligns reads and detects variants with SAMtools and BCFtools.
 
-4. **Visualization**  
-   Using Seaborn to generate annotated heatmaps.
+Visualization
+Uses Seaborn to generate annotated heatmaps (PNG & Streamlit embedded).
 
----
+⚠️ Limitations
+❌ Not compatible with Streamlit Cloud
+Streamlit Cloud does not support running local binaries like bwa, samtools, or blastn.
+✅ Run locally or deploy via GCP, AWS, or Docker for full functionality.
 
-## ⚠️ Notes
+📦 The pipeline assumes pre-formatted exon reference (cancer_exons.fasta) is valid and indexed correctly.
 
-- **Do not upload real patient data.** This is for research/demo purposes.
-- App uses local command-line tools (`blastn`, `bwa`, etc.). Ensure paths are correct if modifying.
+📂 Upload limit set to 2 GB per file.
 
----
+🔐 Do not upload patient-identifiable data. Intended for research/demonstration purposes only.
 
-## 🧬 File Tree (Key Files)
-
-```
+📁 File Tree (Important Files)
+bash
+Copy
+Edit
 .
 ├── app.py                      # Main Streamlit application
-├── cancer_exons.fasta          # Reference database of cancer exons
+├── cancer_exons.fasta          # Reference exon database
 ├── requirements.txt            # Python dependencies
-├── Dockerfile                  # For Docker deployment (optional)
-├── .dockerignore               # Excludes keys and data from Docker context
-├── /uploads/                   # Uploaded sample files
-├── /converted_fastas/          # Converted .fasta files
+├── Dockerfile                  # (Optional) Docker setup
+├── /uploads/                   # Uploaded user files
+├── /converted_fastas/          # Converted FASTA files
 ├── /blast_outputs/             # BLAST result files
-├── /alignments/                # SAM/BAM/VCF intermediate files
-├── /variants/                  # Parsed CSV variant results
-└── .streamlit/config.toml      # Optional Streamlit UI settings
-```
-
----
-
-## 🐳 Docker Support
-
-```bash
+├── /alignments/                # SAM/BAM/VCF alignments
+├── /variants/                  # Parsed variant files
+├── abundance_heatmap.png       # Visualization output
+├── mutation_heatmap.png        # Visualization output
+└── outputs_bundle.zip          # All output files bundled
+🐳 Docker Support (Optional)
+bash
+Copy
+Edit
 docker build -t cancer-pipeline .
 docker run -p 8501:8501 cancer-pipeline
-```
+Note: You must ensure all bioinformatics tools are installed inside the Docker container.
 
-> ⚠️ Tools like `bwa` and `samtools` must be available in the Docker image.
+🌐 Deployment Recommendations
+For cloud deployment, use:
 
----
+Google Cloud Platform (GCP) — Compute Engine or App Engine
 
-## 🌐 Deployment Notes
+Amazon AWS — EC2 or ECS (not Lambda)
 
-- **Streamlit Cloud** doesn’t support `bwa`, `samtools`, or `blastn`. Use local or GCP/AWS for full functionality.
-- For production deployment, consider:
-  - GCP with Compute Engine or App Engine
-  - AWS EC2 or Lambda + EFS
-  - Azure Container Instances
+Microsoft Azure — Container Instances
 
----
-
-## 👨‍🔬 Author
-
-**Siddharth Singh Tomar**  
-CSIR-NEERI  
+👨‍🔬 Author
+Siddharth Singh Tomar
 📧 siddharthsinghtomar166@gmail.com
 
----
-
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
