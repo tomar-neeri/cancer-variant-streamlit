@@ -27,6 +27,9 @@ variants/*
 *.zip
 *.log
 
+# ✅ Allow specific flowchart image (override *.png ignore)
+!implementation_flowchart_pipeline.png
+
 # ⚙️ System files
 .DS_Store
 Thumbs.db
