@@ -1,4 +1,73 @@
+# 🔒 SECURITY: Never commit private SSH keys
 id_ed25519
 id_ed25519.pub
-id_ed25519
-id_ed25519.pub
+
+# 🧪 Ignore runtime output folders (but allow .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+converted_fastas/*
+!converted_fastas/.gitkeep
+
+blast_outputs/*
+!blast_outputs/.gitkeep
+
+alignments/*
+!alignments/.gitkeep
+
+variants/*
+!variants/.gitkeep
+
+# 📊 Generated output files
+*.vcf
+*.bam
+*.sam
+*.csv
+*.png
+*.zip
+*.log
+
+# ⚙️ System files
+.DS_Store
+Thumbs.db
+
+# 🔧 Python & Streamlit
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.venv
+*.sqlite3
+
+# 📦 Conda environments
+*.conda
+*.env
+*.bak
+*.lock
+
+# 🚀 Streamlit config
+.streamlit/
+
+# 🐳 Docker (optional)
+.dockerignore
+
+# 🧬 BLAST / BWA index files
+*.nhr
+*.nin
+*.nsq
+*.ndb
+*.ntf
+*.nto
+*.amb
+*.ann
+*.bwt
+*.pac
+*.sa
+*.fai
+
+# 🔁 Backup files
+*~
+*.swp
+*.swo
+
