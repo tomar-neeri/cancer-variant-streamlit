@@ -33,23 +33,33 @@ os.makedirs("variants", exist_ok=True)
 st.set_page_config(page_title="🧬 Cancer Variant Pipeline", layout="wide")
 st.title("🧬 Cancer Variant Detection from Metagenomic datasets")
 
-# === Clean folders function ===
-def clean_folders(folders):
-    """
-    Deletes all files inside the specified folders.
-    Args:
-        folders (list): List of folder paths as strings.
-    """
+# === Manual Cleanup ===
+st.markdown("### 🪝 Data Management")
+if st.button("🚮 Clear Previous Outputs"):
+    folders = ["uploads", "converted_fastas", "blast_outputs", "alignments", "variants"]
     for folder in folders:
         files = glob.glob(os.path.join(folder, "*"))
         for f in files:
             try:
                 if os.path.isfile(f) or os.path.islink(f):
-                    os.unlink(f)  # remove file or link
+                    os.unlink(f)
                 elif os.path.isdir(f):
-                    shutil.rmtree(f)  # remove directory recursively
+                    shutil.rmtree(f)
             except Exception as e:
                 st.warning(f"Could not delete {f}. Reason: {e}")
+    for extra in ["abundance_heatmap.png", "mutation_heatmap.png", "outputs_bundle.zip"]:
+        if os.path.exists(extra):
+            os.remove(extra)
+    st.success("Previous data cleared successfully.")
+    st.session_state.bwa_indexed = False
+
+# === Upload Interface ===
+with st.expander("📁 Upload FASTA / FASTQ / .gz / .zip (≤ 2 GB each)"):
+    uploaded_files = st.file_uploader(
+        "Upload one or more sequence files",
+        type=["fasta", "fa", "fna", "fastq", "fq", "gz", "zip"],
+        accept_multiple_files=True
+    )
 
 # === Create BLAST DB ===
 def create_blast_db():
@@ -77,61 +87,49 @@ def ensure_bwa_index(fasta_file):
             raise
 
 # === Prepare Sample ===
-def prepare_sample(uploaded_file, output_dir="uploads", convert_dir="converted_fastas"):
-    raw_path = os.path.join(output_dir, uploaded_file.name)
+def prepare_sample(uploaded_file):
+    raw_path = os.path.join("uploads", uploaded_file.name)
     with open(raw_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
     decompressed_path = None
     fasta_path = None
 
-    # Handle .fq.gz or .fastq.gz
     if uploaded_file.name.endswith((".fq.gz", ".fastq.gz")):
         decompressed_path = raw_path.replace(".gz", "")
         with gzip.open(raw_path, "rt") as f_in, open(decompressed_path, "w") as f_out:
             shutil.copyfileobj(f_in, f_out)
-        fasta_path = os.path.join(convert_dir, Path(decompressed_path).stem + ".fasta")
+        fasta_path = os.path.join("converted_fastas", Path(decompressed_path).stem + ".fasta")
         SeqIO.write(SeqIO.parse(decompressed_path, "fastq"), fasta_path, "fasta")
-
-    # Handle .fastq or .fq
     elif uploaded_file.name.endswith((".fastq", ".fq")):
-        fasta_path = os.path.join(convert_dir, Path(raw_path).stem + ".fasta")
+        fasta_path = os.path.join("converted_fastas", Path(raw_path).stem + ".fasta")
         SeqIO.write(SeqIO.parse(raw_path, "fastq"), fasta_path, "fasta")
-
-    # Handle .zip
     elif uploaded_file.name.endswith(".zip"):
         with zipfile.ZipFile(raw_path, 'r') as zip_ref:
             for file in zip_ref.namelist():
                 if file.endswith((".fasta", ".fa", ".fna", ".fastq", ".fq")):
-                    zip_ref.extract(file, output_dir)
-                    decompressed_path = os.path.join(output_dir, file)
+                    zip_ref.extract(file, "uploads")
+                    decompressed_path = os.path.join("uploads", file)
                     break
-        if decompressed_path is None:
-            raise Exception("❌ No valid FASTA or FASTQ inside ZIP.")
         if decompressed_path.endswith((".fastq", ".fq")):
-            fasta_path = os.path.join(convert_dir, Path(decompressed_path).stem + ".fasta")
+            fasta_path = os.path.join("converted_fastas", Path(decompressed_path).stem + ".fasta")
             SeqIO.write(SeqIO.parse(decompressed_path, "fastq"), fasta_path, "fasta")
         else:
             fasta_path = decompressed_path
-
-    # Handle other .gz (e.g., .fasta.gz)
     elif uploaded_file.name.endswith(".gz"):
         decompressed_path = raw_path.replace(".gz", "")
         with gzip.open(raw_path, "rt") as f_in, open(decompressed_path, "w") as f_out:
             shutil.copyfileobj(f_in, f_out)
         fasta_path = decompressed_path
-
     else:
-        fasta_path = raw_path  # fallback for .fasta, .fa, etc.
+        fasta_path = raw_path
 
-    # Sample name derived from uploaded filename (without extension)
     sample_name = uploaded_file.name
     for ext in [".gz", ".zip", ".fastq", ".fq", ".fasta", ".fa", ".fna"]:
         sample_name = sample_name.replace(ext, "")
     sample_name = sample_name.replace("/", "_")
 
     return sample_name, fasta_path
-
 
 # === BLAST ===
 def run_blast(query_fasta, output_file):
@@ -156,7 +154,6 @@ def compute_relative_abundance(blast_file, sample_name):
 
 # === Align & Call Variants ===
 def align_and_call_variants(fasta_path, sample_name):
-    ensure_bwa_index(cancer_fasta)
     sam_path = f"alignments/{sample_name}.sam"
     bam_path = f"alignments/{sample_name}.bam"
     sorted_bam = f"alignments/{sample_name}_sorted.bam"
@@ -208,38 +205,45 @@ def build_mutation_matrix(variant_dir):
 # === Visualizations ===
 def visualize_abundance(abundance_df):
     st.subheader("🧪 Relative Abundance Heatmap")
-    plt.figure(figsize=(12, 6))
-    sns.heatmap(abundance_df, cmap="magma", annot=True, fmt=".1f")
-    plt.title("Relative Abundance of Cancer Genes")
-    st.pyplot(plt)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    sns.heatmap(abundance_df, cmap="magma", annot=True, fmt=".1f", ax=ax)
+    ax.set_title("Relative Abundance of Cancer Genes")
+    fig.tight_layout()
+    fig.savefig("abundance_heatmap.png")
+    st.pyplot(fig)
+    with open("abundance_heatmap.png", "rb") as f:
+        st.download_button("⬇ Download Abundance Heatmap (PNG)", f, file_name="abundance_heatmap.png", mime="image/png")
 
 def visualize_mutations(mutation_df):
     st.subheader("🔬 Mutation Count Heatmap")
-    plt.figure(figsize=(12, 6))
-    sns.heatmap(mutation_df, cmap="viridis", annot=True, fmt="d")
-    plt.title("Mutation Count per Gene")
-    st.pyplot(plt)
+    fig, ax = plt.subplots(figsize=(12, 6))
+    sns.heatmap(mutation_df, cmap="viridis", annot=True, fmt="d", ax=ax)
+    ax.set_title("Mutation Count per Gene")
+    fig.tight_layout()
+    fig.savefig("mutation_heatmap.png")
+    st.pyplot(fig)
+    with open("mutation_heatmap.png", "rb") as f:
+        st.download_button("⬇ Download Mutation Heatmap (PNG)", f, file_name="mutation_heatmap.png", mime="image/png")
 
-# === Upload Interface ===
-with st.expander("📁 Upload FASTA / FASTQ / .gz / .zip (≤ 2 GB each)"):
-    uploaded_files = st.file_uploader(
-        "Upload one or more sequence files",
-        type=["fasta", "fa", "fna", "fastq", "fq", "gz", "zip"],
-        accept_multiple_files=True
-    )
+# === Bundle Outputs ===
+def bundle_all_outputs():
+    zip_path = "outputs_bundle.zip"
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for folder in ["blast_outputs", "variants", "alignments"]:
+            for file in glob.glob(f"{folder}/*"):
+                zipf.write(file)
+        for extra_file in ["abundance_summary.csv", "mutation_summary.csv", "abundance_heatmap.png", "mutation_heatmap.png"]:
+            if os.path.exists(extra_file):
+                zipf.write(extra_file)
+    return zip_path
 
-# === Pipeline Runner ===
+# === Pipeline ===
 if uploaded_files:
-    # Clean old data first before processing new files
-    clean_folders([
-        "uploads",
-        "converted_fastas",
-        "blast_outputs",
-        "alignments",
-        "variants"
-    ])
-
     create_blast_db()
+    if "bwa_indexed" not in st.session_state or not st.session_state.bwa_indexed:
+        ensure_bwa_index(cancer_fasta)
+        st.session_state.bwa_indexed = True
+
     all_abundances = []
 
     for uploaded_file in uploaded_files:
@@ -258,19 +262,41 @@ if uploaded_files:
             var_df = parse_variants(vcf, sample_name)
             var_df.to_csv(variant_csv, index=False)
 
+            with open(blast_out, "rb") as f:
+                st.download_button(
+                    label=f"⬇ Download BLAST Results for {sample_name}",
+                    data=f,
+                    file_name=os.path.basename(blast_out),
+                    mime="text/csv"
+                )
+
+            with open(variant_csv, "rb") as f:
+                st.download_button(
+                    label=f"⬇ Download Variants for {sample_name}",
+                    data=f,
+                    file_name=os.path.basename(variant_csv),
+                    mime="text/csv"
+                )
+
             st.success(f"✅ `{sample_name}` complete.")
 
         except Exception as e:
             st.error(f"❌ Error processing {uploaded_file.name}: {e}")
 
-    # Visualize
+    # Visualizations
     if all_abundances:
         combined_abundance = pd.concat(all_abundances, axis=1).fillna(0)
+        combined_abundance.to_csv("abundance_summary.csv")
         st.download_button("⬇ Download Abundance CSV", combined_abundance.to_csv().encode(), file_name="abundance_summary.csv")
         visualize_abundance(combined_abundance)
 
         mutation_df = build_mutation_matrix("variants")
+        mutation_df.to_csv("mutation_summary.csv")
         st.download_button("⬇ Download Mutation CSV", mutation_df.to_csv().encode(), file_name="mutation_summary.csv")
         visualize_mutations(mutation_df)
+
+        zip_path = bundle_all_outputs()
+        with open(zip_path, "rb") as f:
+            st.download_button("⬇ Download All Outputs (ZIP)", f, file_name="outputs_bundle.zip", mime="application/zip")
 else:
     st.info("📂 Upload files to begin analysis.")
