@@ -177,7 +177,3 @@ For cloud deployment, use:
 📧 siddharthsinghtomar166@gmail.com
 
 ---
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
