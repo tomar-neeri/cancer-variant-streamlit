@@ -1,28 +1,28 @@
 
-# 🧬 Cancer Variant Detection from Metagenomic Datasets
+# Cancer Variant Detection from Metagenomic Datasets
 
 This **Streamlit-based web application** detects cancer-associated exon variants from uploaded metagenomic sequencing data. The pipeline uses **BLAST**, **BWA**, **SAMtools**, and **BCFtools** to compute **relative abundance** and perform **variant calling**, generating both tabular and heatmap visualizations.
 
 ---
 
-## 📁 Features
+## Features
 
 - Upload `.fasta`, `.fastq`, `.fq`, `.gz`, or `.zip` files.
 - Detect cancer exon hits using **BLASTn**.
 - Perform alignments with **BWA** and call variants with **SAMtools + BCFtools**.
 - Automatically decompress and convert formats via Biopython.
 - Generates:
-  - 🧪 Relative abundance heatmap per gene.
-  - 🔬 Mutation count heatmap per gene.
-  - 📄 Downloadable CSV summaries.
-  - 🖼 PNG downloads of heatmaps.
-  - 📦 One-click download of all outputs in a `.zip` archive.
+  - Relative abundance heatmap per gene.
+  - Mutation count heatmap per gene.
+  - Downloadable CSV summaries.
+  - PNG downloads of heatmaps.
+  - One-click download of all outputs in a `.zip` archive.
 
 ---
 
-## 🖥️ Run Locally (Linux/WSL Recommended)
+## Run Locally (Linux/WSL Recommended)
 
-### 🔧 Prerequisites
+### Prerequisites 
 
 - `Python 3.8+`
 - `makeblastdb`, `blastn` (from BLAST+)
@@ -32,13 +32,13 @@ This **Streamlit-based web application** detects cancer-associated exon variants
 - `gzip`, `zip`, `unzip`
 - `git`
 
-### 📦 System Package Installation (Ubuntu/WSL)
+### System Package Installation (Ubuntu/WSL)
 
 ```bash
 sudo apt update && sudo apt install -y   bwa samtools bcftools ncbi-blast+   gzip unzip build-essential python3-venv
 ```
 
-### 🚀 Steps to Run
+### Steps to Run
 
 ```bash
 # Clone the repository
@@ -57,11 +57,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-📍 Visit: `http://localhost:8501`
+Visit: `http://localhost:8501`
 
 ---
 
-## 🧪 Input File Formats
+## Input File Formats
 
 You can upload multiple files in any of the following formats:
 
@@ -78,13 +78,13 @@ You can upload multiple files in any of the following formats:
 
 ---
 
-## 📊 Outputs
+## Outputs
 
-### 📈 Relative Abundance Heatmap
+### Relative Abundance Heatmap
 
 - Gene-wise percent abundance from BLAST hits.
 
-### 🧬 Mutation Count Heatmap
+### Mutation Count Heatmap
 
 - Number of unique mutations detected per cancer gene.
 
@@ -100,7 +100,7 @@ You can upload multiple files in any of the following formats:
 
 ---
 
-## 🔬 Internal Workflow
+## Internal Workflow
 
 1. **Upload & Decompression**  
    Files are decompressed and converted into `.fasta` if necessary using Biopython.
@@ -150,7 +150,7 @@ You can upload multiple files in any of the following formats:
 
 ---
 
-## 🐳 Docker Support (Optional)
+## Docker Support (Optional)
 
 ```bash
 docker build -t cancer-pipeline .
@@ -171,7 +171,7 @@ For cloud deployment, use:
 
 ---
 
-## 👨‍🔬 Author
+## Author
 
 **Siddharth Singh Tomar**  
 📧 siddharthsinghtomar166@gmail.com
