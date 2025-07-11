@@ -88,7 +88,7 @@ You can upload multiple files in any of the following formats:
 
 - Number of unique mutations detected per cancer gene.
 
-### 📁 Downloadable Outputs
+### Downloadable Outputs
 
 | File | Description |
 |------|-------------|
@@ -116,21 +116,21 @@ You can upload multiple files in any of the following formats:
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
-- ❌ **Not compatible with Streamlit Cloud**  
+- **Not compatible with Streamlit Cloud**  
   Streamlit Cloud does not support running local binaries like `bwa`, `samtools`, or `blastn`.  
-  ✅ **Run locally** or deploy via **GCP**, **AWS**, or **Docker** for full functionality.
+**Run locally** or deploy via **GCP**, **AWS**, or **Docker** for full functionality.
 
-- 📦 The pipeline assumes pre-formatted exon reference (`cancer_exons.fasta`) is valid and indexed correctly.
+- The pipeline assumes pre-formatted exon reference (`cancer_exons.fasta`) is valid and indexed correctly.
 
-- 📂 Upload limit set to 2 GB per file.
+- Upload limit set to 2 GB per file.
 
-- 🔐 Do not upload patient-identifiable data. Intended for research/demonstration purposes only.
+- Do not upload patient-identifiable data. Intended for research/demonstration purposes only.
 
 ---
 
-## 📁 File Tree (Important Files)
+## File Tree (Important Files)
 
 ```
 .
@@ -161,7 +161,7 @@ docker run -p 8501:8501 cancer-pipeline
 
 ---
 
-## 🌐 Deployment Recommendations
+## Deployment Recommendations
 
 For cloud deployment, use:
 
