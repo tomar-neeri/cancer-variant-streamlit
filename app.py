@@ -30,11 +30,11 @@ os.makedirs("alignments", exist_ok=True)
 os.makedirs("variants", exist_ok=True)
 
 # === Streamlit Config ===
-st.set_page_config(page_title="🧬 Cancer Variant Pipeline", layout="wide")
-st.title("🧬 Cancer Variant Detection from Metagenomic datasets")
+st.set_page_config(page_title="Cancer Variant Pipeline", layout="wide")
+st.title("Cancer Variant Detection from Metagenomic datasets")
 
 # === Manual Cleanup ===
-st.markdown("### 🪝 Data Management")
+st.markdown("#### Data Management")
 if st.button("🚮 Clear Previous Outputs"):
     folders = ["uploads", "converted_fastas", "blast_outputs", "alignments", "variants"]
     for folder in folders:
@@ -54,6 +54,7 @@ if st.button("🚮 Clear Previous Outputs"):
     st.session_state.bwa_indexed = False
 
 # === Upload Interface ===
+st.markdown("#### File Upload")
 with st.expander("📁 Upload FASTA / FASTQ / .gz / .zip (≤ 2 GB each)"):
     uploaded_files = st.file_uploader(
         "Upload one or more sequence files",
@@ -204,7 +205,7 @@ def build_mutation_matrix(variant_dir):
 
 # === Visualizations ===
 def visualize_abundance(abundance_df):
-    st.subheader("🧪 Relative Abundance Heatmap")
+    st.subheader("Relative Abundance Heatmap")
     fig, ax = plt.subplots(figsize=(12, 6))
     sns.heatmap(abundance_df, cmap="magma", annot=True, fmt=".1f", ax=ax)
     ax.set_title("Relative Abundance of Cancer Genes")
@@ -215,7 +216,7 @@ def visualize_abundance(abundance_df):
         st.download_button("⬇ Download Abundance Heatmap (PNG)", f, file_name="abundance_heatmap.png", mime="image/png")
 
 def visualize_mutations(mutation_df):
-    st.subheader("🔬 Mutation Count Heatmap")
+    st.subheader("Mutation Count Heatmap")
     fig, ax = plt.subplots(figsize=(12, 6))
     sns.heatmap(mutation_df, cmap="viridis", annot=True, fmt="d", ax=ax)
     ax.set_title("Mutation Count per Gene")
@@ -249,7 +250,7 @@ if uploaded_files:
     for uploaded_file in uploaded_files:
         try:
             sample_name, fasta_path = prepare_sample(uploaded_file)
-            st.info(f"🔬 Processing `{sample_name}`")
+            st.info(f"Processing `{sample_name}`")
 
             blast_out = f"blast_outputs/{sample_name}_blast.csv"
             variant_csv = f"variants/{sample_name}_variants.csv"
