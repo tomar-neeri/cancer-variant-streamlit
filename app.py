@@ -53,6 +53,12 @@ if st.button("🚮 Clear Previous Outputs"):
     st.success("Previous data cleared successfully.")
     st.session_state.bwa_indexed = False
 
+# ⚠️ Add this warning right below
+st.warning(
+    "⚠️ If you're running the pipeline on new samples, it's strongly recommended to **clear previous outputs** first. "
+    "Otherwise, the heatmaps might include data from earlier uploads that were not cleared."
+)
+
 # === Upload Interface ===
 st.markdown("#### File Upload")
 with st.expander("📁 Upload FASTA / FASTQ / .gz / .zip (≤ 2 GB each)"):
